@@ -66,22 +66,17 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return data
     
-    # 유저, 토큰 생성
+    # 유저 생성 / 토큰은 뷰에서 생성
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
             userid=validated_data['userid'],
         )
-
         user.set_password(validated_data['password'])
         user.save()
 
-        token = Token.objects.create(user=user)
-
-        return {
-            'user': user,
-            'token': token.key
-        }
+        # 토큰 생성은 뷰에서 처리하도록 변경
+        return user
 
 # 닉네임 중복 확인 시리얼라이저
 class UsernameUniqueSerializer(serializers.ModelSerializer):

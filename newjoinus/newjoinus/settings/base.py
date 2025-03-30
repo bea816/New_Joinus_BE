@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # 패키지
     'rest_framework',
     'corsheaders', # 배포
+    'rest_framework.authtoken', # 토큰
 
     # 앱
     'users',
@@ -112,7 +113,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # user 모델
 AUTH_USER_MODEL = 'users.User'
 
-# user token 인증 방식
+# 로그인/회원가입 token 인증 방식
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
