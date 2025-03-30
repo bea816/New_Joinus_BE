@@ -6,7 +6,11 @@ import sys
 
 def main():
     env = os.getenv('DJANGO_ENV', 'local')
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.local')
+    if env == 'production':
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.prod')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.local')
+        
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
