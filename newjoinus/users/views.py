@@ -3,7 +3,7 @@ from .serializers import *
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-#from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 
 # 회원가입 뷰
 class RegisterView(generics.CreateAPIView):
@@ -23,11 +23,13 @@ class RegisterView(generics.CreateAPIView):
                 },
                 "token": token.key  
             }, status=status.HTTP_200_OK)
+        # 규정 내 회원가입 실패
         except ValidationError as e:
             return Response({
                 "message": "회원가입에 실패했습니다.",
                 "errors": e.detail  
             }, status=status.HTTP_202_ACCEPTED)  
+        # 규정 이외 회원가입 실패
         except Exception as e:
             return Response({
                 "message": "알 수 없는 오류가 발생했습니다.",
@@ -48,3 +50,19 @@ class UsernameUniqueView(generics.GenericAPIView):
             return Response({
                 "message": "사용할 수 없는 닉네임입니다."
             }, status=status.HTTP_202_ACCEPTED)
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        # 유효성 검사
+        if not serializer.is_valid():
+            return Response({
+                "errors": serializer.errors,
+                "message": "로그인에 실패했습니다."
+            }, status=status.HTTP_202_ACCEPTED)
+
+        token = serializer.validated_data['token']
+        return Response({"token": token}, status=status.HTTP_200_OK)

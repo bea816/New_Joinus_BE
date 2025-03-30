@@ -1,10 +1,12 @@
 from .models import *
 from django.contrib.auth.password_validation import validate_password # 패스워드 검증
 from django.contrib.auth import authenticate # user 인증함수. 자격증명 유효한 경우 User객체 반환
-
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token # 토큰 모델
 from rest_framework.validators import UniqueValidator # 이메일 중복방지 검증
+from django.contrib.auth import authenticate # 로그인 사용자 인증
+from rest_framework.exceptions import ValidationError
+
 
 # 회원가입 시리얼라이저
 class RegisterSerializer(serializers.ModelSerializer):
@@ -87,3 +89,23 @@ class UsernameUniqueSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username']
+
+# 로그인 시리얼라이저
+class LoginSerializer(serializers.Serializer):
+    userid = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        user = authenticate(username=data['userid'], password=data['password'])
+
+        if user:
+            try:
+                token, created = Token.objects.get_or_create(user=user)
+                return {
+                    'token': token.key,  
+                    'user': user  
+                }
+            except Exception as e:
+                raise ValidationError({"error": "토큰 생성 중 오류가 발생했습니다."})
+        
+        raise ValidationError({"error": "잘못된 아이디/비밀번호입니다."}) 
