@@ -5,8 +5,8 @@ import sys
 
 
 def main():
-    env = os.getenv('DJANGO_ENV', 'local')
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.local')
+    if not os.getenv('DJANGO_SETTINGS_MODULE'):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.local')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
