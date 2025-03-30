@@ -27,11 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 앱 제외
+    # 패키지
     'rest_framework',
     'corsheaders', # 배포
+    'rest_framework.authtoken', # 토큰
 
     # 앱
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -107,3 +109,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# user 모델
+AUTH_USER_MODEL = 'users.User'
+
+# 로그인/회원가입 token 인증 방식
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
