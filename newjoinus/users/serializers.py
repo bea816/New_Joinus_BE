@@ -6,7 +6,15 @@ from rest_framework.authtoken.models import Token # 토큰 모델
 from rest_framework.validators import UniqueValidator # 이메일 중복방지 검증
 from django.contrib.auth import authenticate # 로그인 사용자 인증
 from rest_framework.exceptions import ValidationError
+import re
 
+# 회원가입 비밀번호 조건
+def validate_password_strength(password):
+    if not re.search(r'\d', password):
+        raise ValidationError(
+            "비밀번호는 최소 1개 이상의 숫자를 포함해야 합니다.",
+            code='password_no_number'
+        )
 
 # 회원가입 시리얼라이저
 class RegisterSerializer(serializers.ModelSerializer):
@@ -29,7 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only = True,
         required = True,
-        validators = [validate_password] # 비밀번호 검증
+        validators=[validate_password, validate_password_strength] # 비밀번호 검증
 
     )
 
@@ -41,16 +49,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'userid', 'password', 'password2']
 
-    # 닉네임 글자 수 확인 response
+    # 닉네임 확인 response
     def validate_username(self, value):
+        if not re.match(r'^[0-9a-zA-Z가-힣]+$', value):
+            raise serializers.ValidationError("닉네임은 한글, 영어, 숫자만 사용할 수 있습니다.")
+
         if len(value) > 8:
             raise serializers.ValidationError("닉네임은 8자를 초과할 수 없습니다.")
         return value
 
-    # 아이디 중복 확인 response
     def validate_userid(self, value):
+        if len(value) > 50:
+            raise serializers.ValidationError("아이디는 50자를 초과할 수 없습니다.")
+
+        # 아이디 중복 확인
         if User.objects.filter(userid=value).exists():
             raise serializers.ValidationError("이 아이디는 이미 사용 중입니다.")
+        
+        # 문자가 포함되어 있는지 확인
+        if not re.search(r'[a-zA-Z]', value):
+            raise serializers.ValidationError("아이디는 최소 1개 이상의 문자를 포함해야 합니다.")
         return value    
     
     # 비밀번호 확인 response
