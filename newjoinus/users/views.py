@@ -4,6 +4,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.models import Token
+from django.db import IntegrityError # 회원가입 userid 길이
 
 # 회원가입 뷰
 class RegisterView(generics.CreateAPIView):
@@ -29,6 +30,13 @@ class RegisterView(generics.CreateAPIView):
                 "message": "회원가입에 실패했습니다.",
                 "errors": e.detail  
             }, status=status.HTTP_202_ACCEPTED)  
+        # userid 길이 초과
+        except IntegrityError as e:
+            if "Data too long for column 'userid'" in str(e):
+                return Response({
+                    "message": "회원가입에 실패했습니다.",
+                    "errors": "아이디는 50자를 초과할 수 없습니다."
+                }, status=status.HTTP_400_BAD_REQUEST)
         # 규정 이외 회원가입 실패
         except Exception as e:
             return Response({
