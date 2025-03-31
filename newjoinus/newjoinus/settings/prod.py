@@ -30,6 +30,8 @@ DATABASES = {
         'USER': DBUSER,
         'PASSWORD': DBPASSWORD, 
         'HOST': DBHOST, 
-        'PORT': DBPORT
+        'PORT': DBPORT,
+        'CHARSET': 'utf8mb4',
+        'COLLATION': 'utf8mb4_unicode_ci',
     }
 }
