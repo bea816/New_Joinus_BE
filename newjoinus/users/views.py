@@ -1,10 +1,12 @@
 from .models import *
 from .serializers import *
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.models import Token
 from django.db import IntegrityError # 회원가입 userid 길이
+from rest_framework.permissions import IsAuthenticated # 로그인 확인
 
 # 회원가입 뷰
 class RegisterView(generics.CreateAPIView):
@@ -59,6 +61,7 @@ class UsernameUniqueView(generics.GenericAPIView):
                 "message": "사용할 수 없는 닉네임입니다."
             }, status=status.HTTP_202_ACCEPTED)
 
+# 로그인
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
@@ -74,3 +77,49 @@ class LoginView(generics.GenericAPIView):
 
         token = serializer.validated_data['token']
         return Response({"token": token}, status=status.HTTP_200_OK)
+
+# 로그아웃 뷰
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            Token.objects.get(user=request.user).delete()  # 토큰 삭제
+            return Response({"message": "로그아웃 되었습니다."}, status=status.HTTP_200_OK)
+        except Token.DoesNotExist:
+            return Response({"message": "토큰이 존재하지 않습니다."}, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            return Response({"message": "로그아웃에 실패했습니다.", "details": str(e)}, status=status.HTTP_202_ACCEPTED)
+
+# 회원정보 수정 뷰
+class UsernameUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+    # 현재 닉네임
+    def get(self, request):
+        user = request.user
+        return Response({"current_username": user.username}, status=status.HTTP_200_OK)
+    # 닉네임 수정
+    def put(self, request):
+        user = request.user
+        serializer = UsernameUpdateSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            user.username = serializer.validated_data['username']
+            user.save(update_fields=['username'])  # 변경된 필드만 저장
+
+            return Response({"message": "닉네임이 변경되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_202_ACCEPTED)
+
+# 회원탈퇴
+class UserDeleteAPIView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            user.delete()
+            return Response({"message": "사용자가 삭제되었습니다."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": "사용자 삭제에 실패했습니다.", "error": str(e)}, status=status.HTTP_202_ACCEPTED)
