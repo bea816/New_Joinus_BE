@@ -22,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
         validators= [
-            UniqueValidator(queryset=User.objects.all()),
+            UniqueValidator(queryset=User.objects.all(), message="이미 사용 중인 닉네임입니다."),
             ]
     )
 
@@ -30,7 +30,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     userid = serializers.CharField(
         required = True,
         validators = [
-            UniqueValidator(queryset=User.objects.all()),
+            UniqueValidator(queryset=User.objects.all(), message="이미 사용 중인 아이디입니다."),
             ]
     )
 
@@ -127,3 +127,38 @@ class LoginSerializer(serializers.Serializer):
                 raise ValidationError({"error": "토큰 생성 중 오류가 발생했습니다."})
         
         raise ValidationError({"error": "잘못된 아이디/비밀번호입니다."}) 
+
+# 로그아웃 시리얼라이저
+class LogoutSerializer(serializers.Serializer):
+    pass  # 별도의 필드 필요 없음
+
+# 회원정보 수정 시리얼라이저
+class UsernameUpdateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True,
+        validators=[
+            UniqueValidator(queryset=User.objects.all(), message="이미 사용 중인 닉네임입니다.")
+        ]
+    )
+
+    class Meta:
+        model = User
+        fields = ['username']
+
+    def validate_username(self, value):
+        if not re.match(r'^[0-9a-zA-Z가-힣]+$', value):
+            raise serializers.ValidationError("닉네임은 한글, 영어, 숫자만 사용할 수 있습니다.")
+
+        if len(value) > 8:
+            raise serializers.ValidationError("닉네임은 8자를 초과할 수 없습니다.")
+        return value    
+
+    def update(self, instance, validated_data):
+        new_username = validated_data.get('username', instance.username)
+
+        if instance.username != new_username:  # 변경 사항이 있는 경우만 업데이트
+            instance.username = new_username
+            instance.save(update_fields=['username'])
+
+        return instance
+
