@@ -91,22 +91,35 @@ class LogoutView(generics.GenericAPIView):
         except Exception as e:
             return Response({"message": "로그아웃에 실패했습니다.", "details": str(e)}, status=status.HTTP_202_ACCEPTED)
 
+# 회원정보 수정 뷰
 class UsernameUpdateView(APIView):
     permission_classes = [IsAuthenticated]
-
+    # 현재 닉네임
     def get(self, request):
         user = request.user
         return Response({"current_username": user.username}, status=status.HTTP_200_OK)
-
+    # 닉네임 수정
     def put(self, request):
         user = request.user
         serializer = UsernameUpdateSerializer(user, data=request.data, partial=True)
 
         if serializer.is_valid():
-            # 🔥 직접 user.username을 업데이트한 후 저장
             user.username = serializer.validated_data['username']
             user.save(update_fields=['username'])  # 변경된 필드만 저장
 
             return Response({"message": "닉네임이 변경되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_202_ACCEPTED)
+
+# 회원탈퇴
+class UserDeleteAPIView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            user.delete()
+            return Response({"message": "사용자가 삭제되었습니다."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": "사용자 삭제에 실패했습니다.", "error": str(e)}, status=status.HTTP_202_ACCEPTED)
