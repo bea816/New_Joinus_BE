@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
     # 앱
     'users',
+    'market',
 ]
 
 MIDDLEWARE = [
