@@ -64,7 +64,6 @@ class ItemDetailAPIView(APIView):
                 serializer.save()
                 return Response({"message": "구매가 완료되었습니다."}, status=status.HTTP_200_OK)
             except serializers.ValidationError as e:
-                print("1번")
                 return Response({"message": e.detail[0]}, status=status.HTTP_202_ACCEPTED) # 에러 메세지만 출력
 
         """
