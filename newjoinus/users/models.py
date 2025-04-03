@@ -32,4 +32,7 @@ class User(AbstractUser):
         ]
     )
 
+    points = models.IntegerField(default=0)
 
+    def __str__(self):
+        return f"닉네임: {self.username} / 아이디: {self.userid}"
