@@ -1,4 +1,6 @@
 from .models import *
+from market.models import Purchase, Item
+
 from django.contrib.auth.password_validation import validate_password # 패스워드 검증
 from django.contrib.auth import authenticate # user 인증함수. 자격증명 유효한 경우 User객체 반환
 from rest_framework import serializers
@@ -162,3 +164,11 @@ class UsernameUpdateSerializer(serializers.ModelSerializer):
 
         return instance
 
+# 구매내역 시리얼라이저
+class OrderListSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.item_name')
+    price = serializers.IntegerField(source='item.price')
+
+    class Meta:
+        model = Purchase
+        fields = ['item_name', 'price']

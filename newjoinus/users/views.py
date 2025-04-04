@@ -123,3 +123,14 @@ class UserDeleteAPIView(generics.DestroyAPIView):
             return Response({"message": "사용자가 삭제되었습니다."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": "사용자 삭제에 실패했습니다.", "error": str(e)}, status=status.HTTP_202_ACCEPTED)
+
+# 구매 목록 뷰
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderListSerializer
+
+    def get(self, request):
+        purchase_history = Purchase.objects.filter(user=request.user)
+        serializer = OrderListSerializer(purchase_history, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
