@@ -1,5 +1,7 @@
 from .models import *
 from .serializers import *
+from market.models import Purchase
+
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -123,3 +125,31 @@ class UserDeleteAPIView(generics.DestroyAPIView):
             return Response({"message": "사용자가 삭제되었습니다."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": "사용자 삭제에 실패했습니다.", "error": str(e)}, status=status.HTTP_202_ACCEPTED)
+
+# 구매 목록 뷰
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderListSerializer
+
+    def get(self, request):
+        purchase_history = Purchase.objects.filter(user=request.user)
+        serializer = OrderListSerializer(purchase_history, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+# 테마 변경 뷰
+class CurrentThemeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = CurrentThemeSerializer({"current_theme": user.current_theme})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        user = request.user
+        serializer = CurrentThemeSerializer(user, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "테마가 변경되었습니다.", "current_theme": user.current_theme}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_202_ACCEPTED)
