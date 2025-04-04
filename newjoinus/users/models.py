@@ -33,6 +33,7 @@ class User(AbstractUser):
     )
 
     points = models.IntegerField(default=0)
+    current_theme = models.CharField(max_length=50, default="기본 테마")
 
     def __str__(self):
         return f"닉네임: {self.username} / 아이디: {self.userid}"

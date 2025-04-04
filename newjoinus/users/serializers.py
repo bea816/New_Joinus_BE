@@ -172,3 +172,31 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = ['item_name', 'price']
+
+# 테마 조회, 변경 시리얼라이저
+class CurrentThemeSerializer(serializers.Serializer): 
+    change_theme = serializers.CharField(write_only=True)  
+    current_theme = serializers.CharField(read_only=True)  
+
+    def validate_change_theme(self, value):
+        user = self.context['request'].user
+
+        # 기본 테마는 누구나 선택 가능
+        if value == "기본 테마":
+            return value
+
+        # 구매한 테마인지 확인
+        purchased_themes = Purchase.objects.filter(
+            user=user, item__item_type="theme"
+        ).values_list('item__item_name', flat=True)
+
+        if value not in purchased_themes:
+            raise serializers.ValidationError("구매한 테마만 변경할 수 있습니다.")
+
+        return value
+
+    def update(self, instance, validated_data):
+        new_theme = validated_data.get('change_theme', instance.current_theme)  
+        instance.current_theme = new_theme
+        instance.save()
+        return instance
