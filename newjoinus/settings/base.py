@@ -31,11 +31,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders', # 배포
     'rest_framework.authtoken', # 토큰
+    'django_crontab', # 데일리 메시지
 
     # 앱
     'users',
     'market',
     'us',
+]
+
+CRONJOBS = [
+    ('0 0 * * *', 'us.cron.daily_message_cron'), # US앱 데일리 메세지, 0 0 * * *: 매일 자정마다 실행
 ]
 
 MIDDLEWARE = [

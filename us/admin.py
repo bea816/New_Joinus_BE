@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Us, DailyMessage, SelectedDailyMessage
 
-# Register your models here.
+admin.site.register(Us)
+admin.site.register(DailyMessage)
+admin.site.register(SelectedDailyMessage)
