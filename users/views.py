@@ -40,7 +40,7 @@ class RegisterView(generics.CreateAPIView):
                 return Response({
                     "message": "회원가입에 실패했습니다.",
                     "errors": "아이디는 50자를 초과할 수 없습니다."
-                }, status=status.HTTP_400_BAD_REQUEST)
+                }, status=status.HTTP_202_ACCEPTED)
         # 규정 이외 회원가입 실패
         except Exception as e:
             return Response({
