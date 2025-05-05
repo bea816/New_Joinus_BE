@@ -25,18 +25,21 @@ def select_message():
 
     messages = list(DailyMessage.objects.exclude(content="").values_list("content", flat=True))
 
+
     # 등록된 메시지 중에서 어제의 메시지 제외
     if yesterday_message:
-            messages = [msg for msg in messages if msg != yesterday_message.message.content]
+        messages = [msg for msg in messages if msg != yesterday_message.message.content]
 
     if not messages:
         print("등록된 메시지가 없습니다.")
         return
 
-    message = random.choice(messages)
-    selected_message = DailyMessage.objects.create(content=message)  # 메시지를 생성
+    # 랜덤으로 메세지 선택
+    message_content = random.choice(messages)
+
+    selected_message = DailyMessage.objects.get(content=message_content)
     SelectedDailyMessage.objects.create(message=selected_message, date=today)
-    print(f"'{message}' 메시지가 오늘의 메시지로 설정되었습니다.")
+    print(f"'{message_content}' 메시지가 오늘의 메시지로 설정되었습니다.")
 
 if __name__ == "__main__":
     select_message()
