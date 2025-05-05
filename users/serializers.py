@@ -9,6 +9,7 @@ from rest_framework.validators import UniqueValidator # 이메일 중복방지 �
 from django.contrib.auth import authenticate # 로그인 사용자 인증
 from rest_framework.exceptions import ValidationError
 import re
+from django.contrib.auth import get_user_model
 
 # 회원가입 비밀번호 조건
 def validate_password_strength(password):
@@ -116,18 +117,21 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True, write_only=True)
 
     def validate(self, data):
-        user = authenticate(username=data['userid'], password=data['password'])
+        User = get_user_model()
 
-        if user:
-            try:
-                token, created = Token.objects.get_or_create(user=user)
-                return {
-                    'token': token.key,  
-                    'user': user  
-                }
-            except Exception as e:
-                raise ValidationError({"error": "토큰 생성 중 오류가 발생했습니다."})
+        try:
+            user = User.objects.get(userid=data['userid'])
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                {"error": "잘못된 아이디/비밀번호입니다."}
+            )
         
+        if user.check_password(data['password']):
+            token, created = Token.objects.get_or_create(user=user)
+            return {
+                'token': token.key,  
+                'user': user  
+            }
         raise ValidationError({"error": "잘못된 아이디/비밀번호입니다."}) 
 
 # 로그아웃 시리얼라이저
