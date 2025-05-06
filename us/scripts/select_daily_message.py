@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 # Django 설정 초기화
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.local')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newjoinus.settings.prod')
 django.setup()
 
 from us.models import DailyMessage, SelectedDailyMessage
