@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('30 1 * * *', 'us.cron.daily_message_cron'), # US앱 데일리 메세지, 0 0 * * *: 매일 자정마다 실행
+    ('15 0 * * *', 'us.cron.daily_message_cron'), # US앱 데일리 메세지, 0 0 * * *: 매일 자정마다 실행
 ]
 
 MIDDLEWARE = [
